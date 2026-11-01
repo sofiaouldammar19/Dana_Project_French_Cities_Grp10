@@ -1,0 +1,134 @@
+# Mapping Tarql - communes de France (etape 1.4)
+# Usage : ./tarql mapping.sparql communes-france-2026-clean2.csv > communes.ttl
+# (utiliser clean2 : codes a zeros initiaux restaures, URLs Wikipedia valides)
+#
+# VERIFIE sur l'endpoint INSEE (rdf.insee.fr/sparql) :
+#   igeo:Commune / igeo:Departement / igeo:Region, igeo:codeINSEE, igeo:nom,
+#   igeo:subdivisionDirecteDe (commune -> departement, departement -> region)
+# CONFIRME AUSSI :
+#   - canton : igeo:codeINSEE et igeo:nom confirmes (requete sur l'UUID du canton 7717)
+#   - code postal : dbo:postalCode (present sur LOV)
+# A VERIFIER AVANT DE PRESENTER :
+#   - classes igeo:Canton et igeo:Intercommunalite : presentes dans l'endpoint (liste des classes)
+#   - EPCI : igeo:codeINSEE, igeo:nom et lien commune -> EPCI (igeo:subdivisionDirecteDe)
+# A VERIFIER :
+#   - lien commune -> canton : igeo:subdivisionDirecteDe suppose (meme schema que l'EPCI)
+#   - sur LOV : wgs84:lat / wgs84:long
+# Namespace : https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/ (id/ = donnees, def/ = proprietes du projet)
+
+PREFIX igeo:   <http://rdf.insee.fr/def/geo#>
+PREFIX dbo:    <http://dbpedia.org/ontology/>
+PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX wgs84:  <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
+PREFIX ex:     <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/>
+PREFIX apf:    <http://jena.apache.org/ARQ/property#>
+
+# Colonnes volontairement NON mappees : grille_densite_texte et niveau_equipements_services_texte
+# (libelles deja deduits des codes ex:grilleDensite / ex:niveauEquipements).
+
+CONSTRUCT {
+  # --- Commune ---
+  ?commune a igeo:Commune ;
+      igeo:codeINSEE ?code_insee ;
+      igeo:nom ?nom_standard ;
+      rdfs:label ?labelCommune ;
+      igeo:subdivisionDirecteDe ?dep ;
+      igeo:subdivisionDirecteDe ?canton ;
+      igeo:subdivisionDirecteDe ?epci ;
+      igeo:subdivisionDirecteDe ?aire ;
+      ex:categorieAireAttraction ?catAire ;
+      dbo:postalCode ?codePostal ;
+      dbo:demonym ?gentileFr ;
+      rdfs:seeAlso ?villedereve ;
+      dbo:populationTotal ?pop ;
+      dbo:areaTotal ?surfaceM2 ;
+      dbo:populationDensity ?dens ;
+      dbo:minimumElevation ?altMin ;
+      dbo:elevation ?altMoy ;
+      dbo:maximumElevation ?altMax ;
+      wgs84:lat ?lat ;
+      wgs84:long ?long ;
+      ex:grilleDensite ?grille ;
+      ex:niveauEquipements ?equip ;
+      ex:nombreQPV ?qpv ;
+      foaf:isPrimaryTopicOf ?wikipedia .
+
+  # --- Departement ---
+  ?dep a igeo:Departement ;
+      igeo:codeINSEE ?dep_code ;
+      igeo:nom ?dep_nom ;
+      igeo:subdivisionDirecteDe ?region .
+
+  # --- Region ---
+  ?region a igeo:Region ;
+      igeo:codeINSEE ?reg_code ;
+      igeo:nom ?reg_nom .
+
+  # --- Aire d'attraction des villes (classe, code, nom et lien confirmes sur l'endpoint INSEE) ---
+  ?aire a igeo:AireDAttractionDesVilles2020 ;
+      igeo:codeINSEE ?code_aire_attraction ;
+      igeo:nom ?nom_aire_attraction .
+
+  # --- Canton (classe igeo:Canton presente dans l'endpoint INSEE) ---
+  ?canton a igeo:Canton ;
+      igeo:codeINSEE ?canton_code ;
+      igeo:nom ?canton_nom .
+
+  # --- EPCI : igeo:Intercommunalite (il n'existe pas de igeo:EPCI), code = igeo:codeINSEE
+  #     (SIREN, chaine), nom = igeo:nom, lien commune -> EPCI = igeo:subdivisionDirecteDe.
+  #     Tout est confirme sur l'endpoint INSEE. ---
+  ?epci a igeo:Intercommunalite ;
+      igeo:codeINSEE ?epciCode ;
+      igeo:nom ?epci_nom .
+}
+WHERE {
+  # URIs (construites sur les codes INSEE)
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/commune/",     ?code_insee)) AS ?commune)
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/departement/", ?dep_code))   AS ?dep)
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/region/",      ?reg_code))   AS ?region)
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/canton/",      ?canton_code)) AS ?canton)
+
+  # epci_code : on enleve un eventuel ".0" (sans effet si le code est deja "200000172")
+  BIND (STRBEFORE(CONCAT(?epci_code, "."), ".") AS ?epciCode)
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/epci/", ?epciCode)) AS ?epci)
+
+  # Aire d'attraction : code sur 3 caracteres ("001"). Le code "000" veut dire
+  # "commune hors attraction des villes" (8895 communes) : ce n'est pas une aire, donc on
+  # ne cree ni l'entite ni le lien. ?aire_absente n'est jamais definie : l'IF echoue pour
+  # "000" et ?aire reste non liee, donc les triplets qui l'utilisent sont ignores.
+  BIND (IF(?code_aire_attraction != "000",
+           IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/aire-attraction/", ?code_aire_attraction)),
+           ?aire_absente) AS ?aire)
+  # La categorie "30" (hors attraction) n'est donnee que pour les communes en "000" : meme garde
+  BIND (IF(?code_aire_attraction != "000", xsd:integer(?categorie_aire_attraction), ?aire_absente) AS ?catAire)
+
+  # Libelle de la commune avec langue
+  BIND (STRLANG(?nom_standard, "fr") AS ?labelCommune)
+
+  # Code postal sur 5 caracteres (restaure le 0 initial perdu : 1000 -> 01000)
+  BIND (SUBSTR(CONCAT("00000", ?code_postal), STRLEN(?code_postal) + 1) AS ?codePostal)
+
+  # Gentile : texte avec langue (cellule vide -> variable non liee -> pas de triplet)
+  BIND (STRLANG(?gentile, "fr") AS ?gentileFr)
+
+  # Ville de reve : IRI seulement si la cellule n'est pas vide (vide -> pas de triplet)
+  BIND (IRI(?url_villedereve) AS ?villedereve)
+
+  # Valeurs numeriques typees
+  BIND (xsd:integer(?population)                       AS ?pop)
+  BIND (xsd:double(?superficie_km2) * 1000000          AS ?surfaceM2)   # km2 -> m2 (DBpedia), garde les decimales si elles existent
+  BIND (xsd:double(?densite)                           AS ?dens)
+  BIND (xsd:double(?altitude_minimale)                 AS ?altMin)
+  BIND (xsd:double(?altitude_moyenne)                  AS ?altMoy)
+  BIND (xsd:double(?altitude_maximale)                 AS ?altMax)
+  BIND (xsd:double(?latitude_mairie)                   AS ?lat)
+  BIND (xsd:double(?longitude_mairie)                  AS ?long)
+  BIND (xsd:integer(?grille_densite)                   AS ?grille)
+  BIND (xsd:integer(?niveau_equipements_services)      AS ?equip)
+  BIND (xsd:integer(?qpv_nombre)                       AS ?qpv)
+
+  # Lien vers la page Wikipedia (pont vers DBpedia a l'etape 4)
+  BIND (IRI(?url_wikipedia) AS ?wikipedia)
+}

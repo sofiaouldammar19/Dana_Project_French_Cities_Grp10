@@ -1,0 +1,12 @@
+PREFIX ex:  <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/>
+PREFIX apf: <http://jena.apache.org/ARQ/property#>
+
+CONSTRUCT {
+  ?commune ex:codesPostaux ?cpItem .
+}
+WHERE {
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/id/commune/", ?code_insee)) AS ?commune)
+
+  ?cpItem apf:strSplit (?codes_postaux ",\\s*") .
+}
+

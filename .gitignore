@@ -1,0 +1,11 @@
+# Fichiers RDF générés
+*.nt
+
+# Sauvegardes
+*backup*
+
+# Fichiers de test
+mapping/*test*
+
+# Fichiers temporaires
+me
