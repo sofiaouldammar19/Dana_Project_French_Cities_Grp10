@@ -1,3 +1,8 @@
+# Mapping Tarql des codes postaux - un triplet ex:codesPostaux par code (etape 1.4)
+# Usage (depuis la racine du depot) :
+#   tarql --encoding UTF-8 --ntriples mapping/postaux.sparql data/communes-france-2026-clean2.csv > postaux.nt
+#   puis conversion en Turtle -> mapping/postaux.ttl (voir README, section 5.3)
+
 PREFIX ex:  <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/>
 PREFIX apf: <http://jena.apache.org/ARQ/property#>
 
@@ -9,4 +14,3 @@ WHERE {
 
   ?cpItem apf:strSplit (?codes_postaux ",\\s*") .
 }
-

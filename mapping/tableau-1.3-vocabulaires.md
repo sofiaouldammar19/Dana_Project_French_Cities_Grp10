@@ -11,7 +11,7 @@ Préfixes : `igeo:` = http://rdf.insee.fr/def/geo# · `dbo:` = http://dbpedia.or
 | dep_code | Code du département | igeo:codeINSEE | |
 | dep_nom | Nom du département | igeo:nom | |
 | canton_code | Code du canton ou ville (INSEE) | igeo:codeINSEE | pas le canton électoral : une commune répartie sur plusieurs cantons a son propre code (Nantes = 4496) |
-| canton_nom | Nom du canton | igeo:nom | |
+| canton_nom | Nom du canton ou ville | igeo:nom | |
 | epci_code | Code de l'EPCI (SIREN) | igeo:codeINSEE | ressource de classe igeo:Intercommunalite |
 | epci_nom | Nom de l'EPCI | igeo:nom | |
 | code_postal | Code postal principal | dbo:postalCode | présent sur LOV |

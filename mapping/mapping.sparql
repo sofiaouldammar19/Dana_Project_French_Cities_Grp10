@@ -1,20 +1,17 @@
-# Mapping Tarql - communes de France (etape 1.4)
-# Usage : ./tarql mapping.sparql communes-france-2026-clean2.csv > communes.ttl
-# (utiliser clean2 : codes a zeros initiaux restaures, URLs Wikipedia valides)
+# Mapping Tarql principal - communes de France (etape 1.4)
+# Usage (depuis la racine du depot) :
+#   tarql --encoding UTF-8 --ntriples mapping/mapping.sparql data/communes-france-2026-clean2.csv > communes.nt
+#   puis conversion en Turtle -> mapping/communes.ttl (voir README, section 5.3)
+# (clean2 : codes a zeros initiaux restaures, URLs Wikipedia valides, colonne superficie_hectare)
 #
-# VERIFIE sur l'endpoint INSEE (rdf.insee.fr/sparql) :
-#   igeo:Commune / igeo:Departement / igeo:Region, igeo:codeINSEE, igeo:nom,
-#   igeo:subdivisionDirecteDe (commune -> departement, departement -> region)
-# CONFIRME AUSSI :
-#   - canton : igeo:codeINSEE et igeo:nom confirmes (requete sur l'UUID du canton 7717)
-#   - code postal : dbo:postalCode (present sur LOV)
-# A VERIFIER AVANT DE PRESENTER :
-#   - classes igeo:Canton et igeo:Intercommunalite : presentes dans l'endpoint (liste des classes)
-#   - EPCI : igeo:codeINSEE, igeo:nom et lien commune -> EPCI (igeo:subdivisionDirecteDe)
-# A VERIFIER :
-#   - lien commune -> canton : igeo:subdivisionDirecteDe suppose (meme schema que l'EPCI)
-#   - sur LOV : wgs84:lat / wgs84:long
-# Namespace : https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/ (id/ = donnees, def/ = proprietes du projet)
+# Termes verifies sur l'endpoint INSEE (rdf.insee.fr/sparql) :
+#   - classes igeo:Commune, igeo:Departement, igeo:Region, igeo:CantonOuVille,
+#     igeo:Intercommunalite, igeo:AireDAttractionDesVilles2020
+#   - igeo:codeINSEE, igeo:nom, igeo:subdivisionDirecteDe
+#     (commune -> departement, canton ou ville, EPCI, aire d'attraction ; departement -> region)
+# Autres vocabulaires : dbo: (DBpedia, present sur LOV), wgs84: (W3C Basic Geo), foaf:, rdfs:
+# Proprietes ex: et niveaux skos:Concept : decrits dans mapping/vocab.ttl
+# Namespace : https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/ (id/ = donnees, def/ = vocabulaire du projet)
 
 PREFIX igeo:   <http://rdf.insee.fr/def/geo#>
 PREFIX dbo:    <http://dbpedia.org/ontology/>
