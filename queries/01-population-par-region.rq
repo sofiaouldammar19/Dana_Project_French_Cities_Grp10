@@ -1,0 +1,17 @@
+# Population, nombre de communes et nombre de départements par région
+
+PREFIX igeo: <http://rdf.insee.fr/def/geo#>
+PREFIX dbo:  <http://dbpedia.org/ontology/>
+
+SELECT ?region (COUNT(DISTINCT ?dep) AS ?nbDepartements) (COUNT(?c) AS ?nbCommunes) (SUM(?pop) AS ?population)
+WHERE {
+    ?c a igeo:Commune ;
+       dbo:populationTotal ?pop ;
+       igeo:subdivisionDirecteDe ?dep .
+    ?dep a igeo:Departement .
+    ?c igeo:subdivisionDirecteDe+ ?reg .
+    ?reg a igeo:Region ;
+         igeo:nom ?region .
+}
+GROUP BY ?region
+ORDER BY DESC(?population)

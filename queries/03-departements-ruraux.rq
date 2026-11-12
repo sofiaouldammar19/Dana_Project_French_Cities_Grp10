@@ -1,0 +1,21 @@
+# Départements à au moins 90 % de communes rurales (grille de densité 6 ou 7)
+
+PREFIX igeo: <http://rdf.insee.fr/def/geo#>
+PREFIX ex:   <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?departement (COUNT(?c) AS ?nbCommunes)
+       (SUM(IF(?code >= 6, 1, 0)) AS ?nbRurales)
+       (xsd:integer(ROUND(100 * SUM(IF(?code >= 6, 1, 0)) / COUNT(?c))) AS ?pourcentageRural)
+WHERE {
+    ?c a igeo:Commune ;
+       ex:grilleDensite/skos:notation ?notation ;
+       igeo:subdivisionDirecteDe ?d .
+    ?d a igeo:Departement ;
+       igeo:nom ?departement .
+    BIND (xsd:integer(?notation) AS ?code)
+}
+GROUP BY ?departement
+HAVING (SUM(IF(?code >= 6, 1, 0)) / COUNT(?c) >= 0.9)
+ORDER BY DESC(?pourcentageRural)

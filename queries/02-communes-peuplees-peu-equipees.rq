@@ -1,0 +1,22 @@
+# Communes de plus de 5 000 habitants avec un niveau d'équipements et de services de 0 ou 1
+
+PREFIX igeo: <http://rdf.insee.fr/def/geo#>
+PREFIX dbo:  <http://dbpedia.org/ontology/>
+PREFIX ex:   <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?commune ?departement ?population ?niveau
+WHERE {
+    ?c a igeo:Commune ;
+       igeo:nom ?commune ;
+       dbo:populationTotal ?population ;
+       ex:niveauEquipements ?n ;
+       igeo:subdivisionDirecteDe ?d .
+    ?d a igeo:Departement ;
+       igeo:nom ?departement .
+    ?n skos:notation ?code ;
+       skos:prefLabel ?niveau .
+    FILTER (?population > 5000 && xsd:integer(?code) <= 1)
+}
+ORDER BY DESC(?population)

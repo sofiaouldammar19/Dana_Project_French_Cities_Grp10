@@ -76,6 +76,11 @@ Dana_Project_French_Cities_Grp10/
 │   ├── communes.ttl                      # RDF généré (Turtle)
 │   └── postaux.ttl                       # RDF généré (Turtle)
 │
+├── queries/
+│   ├── 01-population-par-region.rq            # requêtes SPARQL d'analyse (étape 1.6)
+│   ├── 02-communes-peuplees-peu-equipees.rq
+│   └── 03-departements-ruraux.rq
+│
 ├── scripts/
 │   └── ajout_superficie_hectare.py       # ajout de superficie_hectare dans clean2
 │
