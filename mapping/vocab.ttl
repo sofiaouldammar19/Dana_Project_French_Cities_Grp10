@@ -1,0 +1,95 @@
+# =============================================================================
+#  Projet Dana - Groupe 10 - Vocabulaire du projet (prefixe ex:)
+#
+#  Decrit UNIQUEMENT les termes inventes par le projet, c'est-a-dire ceux que les
+#  vocabulaires standards (igeo: INSEE, dbo: DBpedia, wgs84:, foaf:, rdfs:) ne couvrent pas.
+#  - 5 proprietes utilisees dans mapping.sparql et postaux.sparql
+#  - 2 listes de niveaux (SKOS) : grille de densite et niveau d'equipements.
+#    Libelles repris de la source (colonnes *_texte du CSV).
+#
+#  A charger dans Fuseki avec communes.nt et postaux.nt.
+# =============================================================================
+
+@prefix ex:      <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/> .
+@prefix grille:  <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/grille-densite/> .
+@prefix equip:   <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/niveau-equipements/> .
+@prefix igeo:    <http://rdf.insee.fr/def/geo#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ---------- Le vocabulaire lui-meme ----------
+ex: a owl:Ontology ;
+    dcterms:title "Vocabulaire du projet Dana - communes de France"@fr ;
+    dcterms:description "Propriétés et listes de niveaux définies par le groupe 10 pour les informations non couvertes par les vocabulaires standards (INSEE, DBpedia, WGS84, FOAF)."@fr .
+
+# =============================================================================
+#  Proprietes (mapping.sparql et postaux.sparql)
+# =============================================================================
+
+ex:grilleDensite a owl:ObjectProperty ;
+    rdfs:label "grille communale de densité"@fr ;
+    rdfs:comment "Niveau de la commune dans la grille communale de densité de l'INSEE (7 niveaux, de 1 = grands centres urbains à 7 = rural à habitat très dispersé)."@fr ;
+    rdfs:domain igeo:Commune ;
+    rdfs:range skos:Concept ;
+    rdfs:isDefinedBy ex: .
+
+ex:niveauEquipements a owl:ObjectProperty ;
+    rdfs:label "niveau d'équipements et de services"@fr ;
+    rdfs:comment "Niveau de centralité de la commune selon les équipements et services présents (INSEE, 5 niveaux, de 0 = commune non pôle à 4 = centre majeur)."@fr ;
+    rdfs:domain igeo:Commune ;
+    rdfs:range skos:Concept ;
+    rdfs:isDefinedBy ex: .
+
+ex:categorieAireAttraction a owl:DatatypeProperty ;
+    rdfs:label "catégorie dans l'aire d'attraction des villes"@fr ;
+    rdfs:comment "Place de la commune dans son aire d'attraction des villes 2020 (INSEE) : 11 = commune-centre, 12 = autre commune du pôle principal, 13 = commune d'un pôle secondaire, 20 = commune de la couronne. Absente pour les communes hors attraction des villes."@fr ;
+    rdfs:domain igeo:Commune ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy ex: .
+
+ex:nombreQPV a owl:DatatypeProperty ;
+    rdfs:label "nombre de quartiers prioritaires"@fr ;
+    rdfs:comment "Nombre de quartiers prioritaires de la politique de la ville (QPV) situés dans la commune."@fr ;
+    rdfs:domain igeo:Commune ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy ex: .
+
+ex:codesPostaux a owl:DatatypeProperty ;
+    rdfs:label "code postal"@fr ;
+    rdfs:comment "Un des codes postaux de la commune : un triplet par code, une commune pouvant en avoir plusieurs. Le code postal principal est donné par dbo:postalCode."@fr ;
+    rdfs:domain igeo:Commune ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy ex: .
+
+# =============================================================================
+#  Liste des niveaux : grille communale de densite (colonne grille_densite)
+# =============================================================================
+
+ex:grille-densite a skos:ConceptScheme ;
+    skos:prefLabel "Grille communale de densité (INSEE)"@fr ;
+    skos:hasTopConcept grille:1 , grille:2 , grille:3 , grille:4 , grille:5 , grille:6 , grille:7 .
+
+grille:1 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "1" ; skos:prefLabel "Grands centres urbains"@fr .
+grille:2 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "2" ; skos:prefLabel "Centres urbains intermédiaires"@fr .
+grille:3 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "3" ; skos:prefLabel "Petites villes"@fr .
+grille:4 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "4" ; skos:prefLabel "Ceintures urbaines"@fr .
+grille:5 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "5" ; skos:prefLabel "Bourgs ruraux"@fr .
+grille:6 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "6" ; skos:prefLabel "Rural à habitat dispersé"@fr .
+grille:7 a skos:Concept ; skos:inScheme ex:grille-densite ; skos:notation "7" ; skos:prefLabel "Rural à habitat très dispersé"@fr .
+
+# =============================================================================
+#  Liste des niveaux : equipements et services (colonne niveau_equipements_services)
+# =============================================================================
+
+ex:niveau-equipements a skos:ConceptScheme ;
+    skos:prefLabel "Niveau d'équipements et de services (INSEE)"@fr ;
+    skos:hasTopConcept equip:0 , equip:1 , equip:2 , equip:3 , equip:4 .
+
+equip:0 a skos:Concept ; skos:inScheme ex:niveau-equipements ; skos:notation "0" ; skos:prefLabel "commune non pôle"@fr .
+equip:1 a skos:Concept ; skos:inScheme ex:niveau-equipements ; skos:notation "1" ; skos:prefLabel "centre local d'équipements et de services"@fr .
+equip:2 a skos:Concept ; skos:inScheme ex:niveau-equipements ; skos:notation "2" ; skos:prefLabel "centre intermédiaire d'équipements et de services"@fr .
+equip:3 a skos:Concept ; skos:inScheme ex:niveau-equipements ; skos:notation "3" ; skos:prefLabel "centre structurant d'équipements et de services"@fr .
+equip:4 a skos:Concept ; skos:inScheme ex:niveau-equipements ; skos:notation "4" ; skos:prefLabel "centre majeur d'équipements et de services"@fr .

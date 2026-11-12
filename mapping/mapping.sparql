@@ -26,7 +26,8 @@ PREFIX ex:     <https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Gr
 PREFIX apf:    <http://jena.apache.org/ARQ/property#>
 
 # Colonnes volontairement NON mappees : grille_densite_texte et niveau_equipements_services_texte
-# (libelles deja deduits des codes ex:grilleDensite / ex:niveauEquipements).
+# (les libelles sont decrits une seule fois dans vocab.ttl : ex:grilleDensite et
+# ex:niveauEquipements pointent vers un niveau skos:Concept qui porte le libelle).
 
 CONSTRUCT {
   # --- Commune ---
@@ -71,8 +72,10 @@ CONSTRUCT {
       igeo:codeINSEE ?code_aire_attraction ;
       igeo:nom ?nom_aire_attraction .
 
-  # --- Canton (classe igeo:Canton presente dans l'endpoint INSEE) ---
-  ?canton a igeo:Canton ;
+  # --- Canton ou ville : canton_code est le code "canton ou ville" de l'INSEE, pas celui du
+  #     canton electoral (Paris, Lyon, Nantes... ont leur propre code). Classe verifiee sur
+  #     l'endpoint INSEE : c'est igeo:CantonOuVille que la commune a pour subdivisionDirecteDe ---
+  ?canton a igeo:CantonOuVille ;
       igeo:codeINSEE ?canton_code ;
       igeo:nom ?canton_nom .
 
@@ -118,15 +121,16 @@ WHERE {
 
   # Valeurs numeriques typees
   BIND (xsd:integer(?population)                       AS ?pop)
-  BIND (xsd:double(?superficie_km2) * 1000000          AS ?surfaceM2)   # km2 -> m2 (DBpedia), garde les decimales si elles existent
+  BIND (xsd:double(?superficie_hectare) * 10000        AS ?surfaceM2)   # ha -> m2 (DBpedia) ; superficie_km2 est arrondie au km2 (12 communes a 0)
   BIND (xsd:double(?densite)                           AS ?dens)
   BIND (xsd:double(?altitude_minimale)                 AS ?altMin)
   BIND (xsd:double(?altitude_moyenne)                  AS ?altMoy)
   BIND (xsd:double(?altitude_maximale)                 AS ?altMax)
   BIND (xsd:double(?latitude_mairie)                   AS ?lat)
   BIND (xsd:double(?longitude_mairie)                  AS ?long)
-  BIND (xsd:integer(?grille_densite)                   AS ?grille)
-  BIND (xsd:integer(?niveau_equipements_services)      AS ?equip)
+  # Grille de densite / niveau d'equipements : lien vers le niveau (skos:Concept) de vocab.ttl
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/grille-densite/",     ?grille_densite))              AS ?grille)
+  BIND (IRI(CONCAT("https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/def/niveau-equipements/", ?niveau_equipements_services)) AS ?equip)
   BIND (xsd:integer(?qpv_nombre)                       AS ?qpv)
 
   # Lien vers la page Wikipedia (pont vers DBpedia a l'etape 4)

@@ -1,5 +1,3 @@
-
-
 # Projet Web sémantique — French Cities
 
 ## 1. Présentation du projet
@@ -7,6 +5,7 @@
 Ce projet consiste à transformer des données ouvertes concernant les communes françaises en données RDF, afin de les représenter sous forme de graphe de connaissances et de pouvoir les interroger avec le langage SPARQL.
 
 Le travail réalisé jusqu'à présent comprend :
+
 - La récupération et le nettoyage des données des communes françaises.
 - La création de mappings avec Tarql pour transformer les données CSV en RDF.
 - La génération des fichiers RDF au format N-Triples.
@@ -22,6 +21,7 @@ Le fichier CSV utilisé est :
 Il contient les informations relatives aux communes françaises. Les données ont été nettoyées avec **OpenRefine** avant leur transformation.
 
 Le fichier contient notamment :
+
 - Le code INSEE.
 - Le nom de la commune.
 - Les codes postaux.
@@ -36,7 +36,7 @@ Le fichier contient **34 868 communes**.
 ## 3. Technologies utilisées
 
 | Technologie | Utilisation |
-|---|---|
+| --- | --- |
 | OpenRefine | Nettoyage et préparation des données CSV |
 | Tarql | Transformation des données CSV en RDF |
 | RDF | Modélisation des données sous forme de triplets |
@@ -55,6 +55,7 @@ Dana_Project_French_Cities_Grp10/
 ├── mapping/
 │   ├── mapping.sparql
 │   ├── postaux.sparql
+│   ├── vocab.ttl
 │   └── tableau-1.3-vocabulaires.md
 │
 ├── communes.nt
@@ -73,6 +74,7 @@ Deux mappings ont été créés pour transformer les données CSV en RDF.
 Ce mapping permet de créer les ressources RDF correspondant aux communes et aux différentes entités territoriales.
 
 Il génère notamment :
+
 - Les communes.
 - Les départements.
 - Les régions.
@@ -121,10 +123,12 @@ https://sofiaouldammar19.github.io/Dana_Project_French_Cities_Grp10/
 ```
 
 Deux chemins sont utilisés :
+
 - `/id/` pour identifier les ressources.
 - `/def/` pour identifier les propriétés personnalisées.
 
 Le projet réutilise plusieurs vocabulaires existants, notamment :
+
 - `igeo:` pour les informations géographiques.
 - `dbo:` pour les propriétés de DBpedia.
 - `rdfs:` pour les labels et les relations.
@@ -135,7 +139,7 @@ Des propriétés personnalisées sont également utilisées lorsque les vocabula
 
 ## 7. Chargement des données dans Apache Jena Fuseki
 
-Le fichier RDF final est chargé dans Apache Jena Fuseki.
+Le fichier RDF final est chargé dans Apache Jena Fuseki, avec le vocabulaire du projet `mapping/vocab.ttl` (description des propriétés `ex:` et libellés de la grille de densité et du niveau d'équipements).
 
 L'interface de Fuseki est accessible à l'adresse :
 
@@ -176,7 +180,7 @@ WHERE {
 **Résultat attendu :**
 
 | Information | Résultat |
-|---|---|
+| --- | --- |
 | Commune | L'Abergement-Clémenciat |
 | Département | Ain |
 | Région | Auvergne-Rhône-Alpes |
@@ -205,12 +209,10 @@ La requête retourne 13 codes postaux pour la commune ayant le code INSEE `97101
 Plusieurs vérifications ont été effectuées après le chargement du graphe dans Fuseki.
 
 | Vérification | Résultat |
-|---|---:|
+| --- | ---: |
 | Nombre de communes | 34 868 |
 | Nombre de triplets concernant les codes postaux | 48 324 |
 | Nombre de codes postaux pour la commune 97101 | 13 |
 | Nombre total de triplets dans le graphe | 866 032 |
 
 Une correction a également été effectuée sur le nom de la région **Auvergne-Rhône-Alpes**, afin de résoudre un problème d'encodage des caractères.
-
-
